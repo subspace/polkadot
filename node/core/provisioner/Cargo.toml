@@ -15,6 +15,6 @@ polkadot-node-subsystem-util = { path = "../../subsystem-util" }
 futures-timer = "3.0.2"
 
 [dev-dependencies]
-sp-application-crypto = { git = "https://github.com/paritytech/substrate", branch = "master" }
-sp-keystore = { git = "https://github.com/paritytech/substrate", branch = "master" }
+sp-application-crypto = { git = "https://github.com/paritytech/substrate", rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 polkadot-node-subsystem-test-helpers = { path = "../../subsystem-test-helpers" }

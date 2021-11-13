@@ -9,14 +9,14 @@ version = "0.9.12"
 impl-trait-for-tuples = "0.2.0"
 parity-scale-codec = { version = "2.3.1", default-features = false, features = ["derive"] }
 xcm = { path = "..", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-sp-io = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-sp-arithmetic = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-std = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+sp-io = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+sp-arithmetic = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+sp-core = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
+frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 log = { version = "0.4.14", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "master" , default-features = false, optional = true }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 
 [features]
 default = ["std"]
