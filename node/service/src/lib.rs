@@ -23,11 +23,16 @@ mod grandpa_support;
 mod parachains_db;
 mod relay_chain_selection;
 
-#[cfg(feature = "full-node")]
-pub mod overseer;
+// #[cfg(feature = "full-node")]
+// pub mod overseer;
+
+// #[cfg(feature = "full-node")]
+// pub use self::overseer::{OverseerGen, OverseerGenArgs, RealOverseerGen};
 
 #[cfg(feature = "full-node")]
-pub use self::overseer::{OverseerGen, OverseerGenArgs, RealOverseerGen};
+pub mod subspace_overseer;
+#[cfg(feature = "full-node")]
+pub use self::subspace_overseer::{self as overseer, OverseerGen, OverseerGenArgs, RealOverseerGen};
 
 #[cfg(all(test, feature = "disputes"))]
 mod tests;
@@ -925,23 +930,23 @@ where
 					leaves: active_leaves,
 					keystore,
 					runtime_client: overseer_client.clone(),
-					parachains_db,
+					// parachains_db,
 					network_service: network.clone(),
-					authority_discovery_service,
-					pov_req_receiver,
-					chunk_req_receiver,
+					// authority_discovery_service,
+					// pov_req_receiver,
+					// chunk_req_receiver,
 					collation_req_receiver,
-					available_data_req_receiver,
-					statement_req_receiver,
-					dispute_req_receiver,
+					// available_data_req_receiver,
+					// statement_req_receiver,
+					// dispute_req_receiver,
 					registry: prometheus_registry.as_ref(),
 					spawner,
 					is_collator,
-					approval_voting_config,
-					availability_config,
-					candidate_validation_config,
-					chain_selection_config,
-					dispute_coordinator_config,
+					// approval_voting_config,
+					// availability_config,
+					// candidate_validation_config,
+					// chain_selection_config,
+					// dispute_coordinator_config,
 				},
 			)?;
 		let handle = Handle::new(overseer_handle.clone());

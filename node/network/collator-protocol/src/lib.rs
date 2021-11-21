@@ -35,7 +35,7 @@ use polkadot_primitives::v1::CollatorPair;
 use polkadot_subsystem::{
 	errors::SubsystemError,
 	messages::{CollatorProtocolMessage, NetworkBridgeMessage},
-	overseer, SpawnedSubsystem, SubsystemContext, SubsystemSender,
+	overseer, subspace_overseer, SpawnedSubsystem, SubsystemContext, SubsystemSender,
 };
 
 mod error;
@@ -104,10 +104,12 @@ impl CollatorProtocolSubsystem {
 		Context: SubsystemContext<Message = CollatorProtocolMessage>,
 	{
 		match self.protocol_side {
-			ProtocolSide::Validator { keystore, eviction_policy, metrics } =>
-				validator_side::run(ctx, keystore, eviction_policy, metrics).await,
-			ProtocolSide::Collator(local_peer_id, collator_pair, req_receiver, metrics) =>
-				collator_side::run(ctx, local_peer_id, collator_pair, req_receiver, metrics).await,
+			ProtocolSide::Validator { keystore, eviction_policy, metrics } => {
+				validator_side::run(ctx, keystore, eviction_policy, metrics).await
+			}
+			ProtocolSide::Collator(local_peer_id, collator_pair, req_receiver, metrics) => {
+				collator_side::run(ctx, local_peer_id, collator_pair, req_receiver, metrics).await
+			}
 		}
 	}
 }
@@ -127,6 +129,24 @@ where
 		SpawnedSubsystem { name: "collator-protocol-subsystem", future }
 	}
 }
+
+/*
+impl<Context> subspace_overseer::Subsystem<Context, SubsystemError> for CollatorProtocolSubsystem
+where
+	Context: SubsystemContext<Message = CollatorProtocolMessage>,
+	Context: subspace_overseer::SubsystemContext<Message = CollatorProtocolMessage>,
+	<Context as SubsystemContext>::Sender: SubsystemSender,
+{
+	fn start(self, ctx: Context) -> SpawnedSubsystem {
+		let future = self
+			.run(ctx)
+			.map_err(|e| SubsystemError::with_origin("collator-protocol", e))
+			.boxed();
+
+		SpawnedSubsystem { name: "collator-protocol-subsystem", future }
+	}
+}
+*/
 
 /// Modify the reputation of a peer based on its behavior.
 async fn modify_reputation<Context>(ctx: &mut Context, peer: PeerId, rep: Rep)

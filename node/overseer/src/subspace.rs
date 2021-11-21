@@ -89,14 +89,7 @@ pub use polkadot_node_subsystem_types::{
 	jaeger, ActivatedLeaf, ActiveLeavesUpdate, LeafStatus, OverseerSignal,
 };
 
-pub mod metrics;
-pub use self::metrics::Metrics as OverseerMetrics;
-
-/// A dummy subsystem, mostly useful for placeholders and tests.
-pub mod dummy;
-pub use self::dummy::DummySubsystem;
-
-pub mod subspace;
+use crate::OverseerMetrics;
 
 pub use polkadot_node_metrics::{
 	metrics::{prometheus, Metrics as MetricsTrait},
@@ -115,9 +108,6 @@ pub use polkadot_overseer_gen::{
 /// Store 2 days worth of blocks, not accounting for forks,
 /// in the LRU cache. Assumes a 6-second block time.
 pub const KNOWN_LEAVES_CACHE_SIZE: usize = 2 * 24 * 3600 / 6;
-
-#[cfg(test)]
-mod tests;
 
 /// Whether a header supports parachain consensus or not.
 pub trait HeadSupportsParachains {
@@ -154,13 +144,13 @@ impl Handle {
 	}
 
 	/// Send some message to one of the `Subsystem`s.
-	pub async fn send_msg(&mut self, msg: impl Into<AllMessages>, origin: &'static str) {
+	pub async fn send_msg(&mut self, msg: impl Into<AllMessagesSubspace>, origin: &'static str) {
 		self.send_and_log_error(Event::MsgToSubsystem { msg: msg.into(), origin }).await
 	}
 
 	/// Send a message not providing an origin.
 	#[inline(always)]
-	pub async fn send_msg_anon(&mut self, msg: impl Into<AllMessages>) {
+	pub async fn send_msg_anon(&mut self, msg: impl Into<AllMessagesSubspace>) {
 		self.send_msg(msg, "").await
 	}
 
@@ -238,7 +228,7 @@ pub enum Event {
 	/// Message as sent to a subsystem.
 	MsgToSubsystem {
 		/// The actual message.
-		msg: AllMessages,
+		msg: AllMessagesSubspace,
 		/// The originating subsystem name.
 		origin: &'static str,
 	},
@@ -334,7 +324,7 @@ pub async fn forward_events<P: BlockchainEvents<Block>>(client: Arc<P>, mut hand
 /// # 	self as overseer,
 /// #   OverseerSignal,
 /// # 	SubsystemSender as _,
-/// # 	AllMessages,
+/// # 	AllMessagesSubspace,
 /// # 	HeadSupportsParachains,
 /// # 	Overseer,
 /// # 	SubsystemError,
@@ -355,7 +345,7 @@ pub async fn forward_events<P: BlockchainEvents<Block>>(client: Arc<P>, mut hand
 /// where
 ///     Ctx: overseer::SubsystemContext<
 ///				Message=CandidateValidationMessage,
-///				AllMessages=AllMessages,
+///				AllMessagesSubspace=AllMessages,
 ///				Signal=OverseerSignal,
 ///				Error=SubsystemError,
 ///			>,
@@ -403,45 +393,46 @@ pub async fn forward_events<P: BlockchainEvents<Block>>(client: Arc<P>, mut hand
 /// # }
 /// ```
 #[overlord(
-	gen=AllMessages,
+	gen=AllMessagesSubspace,
 	event=Event,
 	signal=OverseerSignal,
 	error=SubsystemError,
-	network=NetworkBridgeEvent<protocol_v1::ValidationProtocol>,
+	// network=NetworkBridgeEvent<protocol_v1::ValidationProtocol>,
 )]
 pub struct Overseer<SupportsParachains> {
-	#[subsystem(no_dispatch, CandidateValidationMessage)]
-	candidate_validation: CandidateValidation,
+	// #[subsystem(no_dispatch, CandidateValidationMessage)]
+	// candidate_validation: CandidateValidation,
 
-	#[subsystem(no_dispatch, CandidateBackingMessage)]
-	candidate_backing: CandidateBacking,
+	// #[subsystem(no_dispatch, CandidateBackingMessage)]
+	// candidate_backing: CandidateBacking,
 
-	#[subsystem(StatementDistributionMessage)]
-	statement_distribution: StatementDistribution,
+	// #[subsystem(StatementDistributionMessage)]
+	// statement_distribution: StatementDistribution,
 
-	#[subsystem(no_dispatch, AvailabilityDistributionMessage)]
-	availability_distribution: AvailabilityDistribution,
+	// #[subsystem(no_dispatch, AvailabilityDistributionMessage)]
+	// availability_distribution: AvailabilityDistribution,
 
-	#[subsystem(no_dispatch, AvailabilityRecoveryMessage)]
-	availability_recovery: AvailabilityRecovery,
+	// #[subsystem(no_dispatch, AvailabilityRecoveryMessage)]
+	// availability_recovery: AvailabilityRecovery,
 
-	#[subsystem(blocking, no_dispatch, BitfieldSigningMessage)]
-	bitfield_signing: BitfieldSigning,
+	// #[subsystem(blocking, no_dispatch, BitfieldSigningMessage)]
+	// bitfield_signing: BitfieldSigning,
 
-	#[subsystem(BitfieldDistributionMessage)]
-	bitfield_distribution: BitfieldDistribution,
+	// #[subsystem(BitfieldDistributionMessage)]
+	// bitfield_distribution: BitfieldDistribution,
 
-	#[subsystem(no_dispatch, ProvisionerMessage)]
-	provisioner: Provisioner,
+	// #[subsystem(no_dispatch, ProvisionerMessage)]
+	// provisioner: Provisioner,
 
 	#[subsystem(no_dispatch, blocking, RuntimeApiMessage)]
 	runtime_api: RuntimeApi,
 
-	#[subsystem(no_dispatch, blocking, AvailabilityStoreMessage)]
-	availability_store: AvailabilityStore,
+	// #[subsystem(no_dispatch, blocking, AvailabilityStoreMessage)]
+	// availability_store: AvailabilityStore,
 
-	#[subsystem(no_dispatch, NetworkBridgeMessage)]
-	network_bridge: NetworkBridge,
+	// FIXME: this might be necessary and we should make our own version, but let's see if we disable it.
+	// #[subsystem(no_dispatch, NetworkBridgeMessage)]
+	// network_bridge: NetworkBridge,
 
 	#[subsystem(no_dispatch, blocking, ChainApiMessage)]
 	chain_api: ChainApi,
@@ -452,26 +443,26 @@ pub struct Overseer<SupportsParachains> {
 	#[subsystem(no_dispatch, CollatorProtocolMessage)]
 	collator_protocol: CollatorProtocol,
 
-	#[subsystem(ApprovalDistributionMessage)]
-	approval_distribution: ApprovalDistribution,
+	// #[subsystem(ApprovalDistributionMessage)]
+	// approval_distribution: ApprovalDistribution,
 
-	#[subsystem(no_dispatch, ApprovalVotingMessage)]
-	approval_voting: ApprovalVoting,
+	// #[subsystem(no_dispatch, ApprovalVotingMessage)]
+	// approval_voting: ApprovalVoting,
 
-	#[subsystem(GossipSupportMessage)]
-	gossip_support: GossipSupport,
+	// #[subsystem(GossipSupportMessage)]
+	// gossip_support: GossipSupport,
 
-	#[subsystem(no_dispatch, DisputeCoordinatorMessage)]
-	dispute_coordinator: DisputeCoordinator,
+	// #[subsystem(no_dispatch, DisputeCoordinatorMessage)]
+	// dispute_coordinator: DisputeCoordinator,
 
-	#[subsystem(no_dispatch, DisputeParticipationMessage)]
-	dispute_participation: DisputeParticipation,
+	// #[subsystem(no_dispatch, DisputeParticipationMessage)]
+	// dispute_participation: DisputeParticipation,
 
-	#[subsystem(no_dispatch, DisputeDistributionMessage)]
-	dispute_distribution: DisputeDistribution,
+	// #[subsystem(no_dispatch, DisputeDistributionMessage)]
+	// dispute_distribution: DisputeDistribution,
 
-	#[subsystem(no_dispatch, ChainSelectionMessage)]
-	chain_selection: ChainSelection,
+	// #[subsystem(no_dispatch, ChainSelectionMessage)]
+	// chain_selection: ChainSelection,
 
 	/// External listeners waiting for a hash to be in the active-leave set.
 	pub activation_external_listeners: HashMap<Hash, Vec<oneshot::Sender<SubsystemResult<()>>>>,
