@@ -33,7 +33,7 @@ use polkadot_subsystem::{
 
 use sp_api::ProvideRuntimeApi;
 use sp_authority_discovery::AuthorityDiscoveryApi;
-use sp_consensus_babe::BabeApi;
+// use sp_consensus_babe::BabeApi;
 use sp_core::traits::SpawnNamed;
 
 use cache::{RequestResult, RequestResultCache};
@@ -90,7 +90,8 @@ impl<Client> RuntimeApiSubsystem<Client> {
 impl<Client, Context> overseer::Subsystem<Context, SubsystemError> for RuntimeApiSubsystem<Client>
 where
 	Client: ProvideRuntimeApi<Block> + Send + 'static + Sync,
-	Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -102,7 +103,8 @@ where
 impl<Client> RuntimeApiSubsystem<Client>
 where
 	Client: ProvideRuntimeApi<Block> + Send + 'static + Sync,
-	Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 {
 	fn store_cache(&mut self, result: RequestResult) {
 		use RequestResult::*;
@@ -300,7 +302,8 @@ async fn run<Client, Context>(
 ) -> SubsystemResult<()>
 where
 	Client: ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -329,7 +332,8 @@ fn make_runtime_api_request<Client>(
 ) -> Option<RequestResult>
 where
 	Client: ProvideRuntimeApi<Block>,
-	Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 {
 	let _timer = metrics.time_make_runtime_api_request();
 
@@ -375,7 +379,8 @@ where
 		Request::DmqContents(id, sender) => query!(DmqContents, dmq_contents(id), sender),
 		Request::InboundHrmpChannelsContents(id, sender) =>
 			query!(InboundHrmpChannelsContents, inbound_hrmp_channels_contents(id), sender),
-		Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
+		// Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
+		Request::CurrentBabeEpoch(sender) => unreachable!("No Babe, we have Subspace"),
 		Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
 	}
 }
