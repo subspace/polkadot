@@ -16,12 +16,12 @@
 
 use super::{AuthorityDiscoveryApi, Block, Error, Hash, IsCollator, Registry, SpawnNamed};
 use lru::LruCache;
-use polkadot_availability_distribution::IncomingRequestReceivers;
-use polkadot_node_core_approval_voting::Config as ApprovalVotingConfig;
-use polkadot_node_core_av_store::Config as AvailabilityConfig;
-use polkadot_node_core_candidate_validation::Config as CandidateValidationConfig;
-use polkadot_node_core_chain_selection::Config as ChainSelectionConfig;
-use polkadot_node_core_dispute_coordinator::Config as DisputeCoordinatorConfig;
+// use polkadot_availability_distribution::IncomingRequestReceivers;
+// use polkadot_node_core_approval_voting::Config as ApprovalVotingConfig;
+// use polkadot_node_core_av_store::Config as AvailabilityConfig;
+// use polkadot_node_core_candidate_validation::Config as CandidateValidationConfig;
+// use polkadot_node_core_chain_selection::Config as ChainSelectionConfig;
+// use polkadot_node_core_dispute_coordinator::Config as DisputeCoordinatorConfig;
 use polkadot_node_network_protocol::request_response::{v1 as request_v1, IncomingRequestReceiver};
 #[cfg(any(feature = "malus", test))]
 pub use polkadot_overseer::{
@@ -42,27 +42,27 @@ use sp_blockchain::HeaderBackend;
 use sp_consensus_babe::BabeApi;
 use std::sync::Arc;
 
-pub use polkadot_approval_distribution::ApprovalDistribution as ApprovalDistributionSubsystem;
-pub use polkadot_availability_bitfield_distribution::BitfieldDistribution as BitfieldDistributionSubsystem;
-pub use polkadot_availability_distribution::AvailabilityDistributionSubsystem;
-pub use polkadot_availability_recovery::AvailabilityRecoverySubsystem;
+// pub use polkadot_approval_distribution::ApprovalDistribution as ApprovalDistributionSubsystem;
+// pub use polkadot_availability_bitfield_distribution::BitfieldDistribution as BitfieldDistributionSubsystem;
+// pub use polkadot_availability_distribution::AvailabilityDistributionSubsystem;
+// pub use polkadot_availability_recovery::AvailabilityRecoverySubsystem;
 pub use polkadot_collator_protocol::{CollatorProtocolSubsystem, ProtocolSide};
-pub use polkadot_dispute_distribution::DisputeDistributionSubsystem;
-pub use polkadot_gossip_support::GossipSupport as GossipSupportSubsystem;
+// pub use polkadot_dispute_distribution::DisputeDistributionSubsystem;
+// pub use polkadot_gossip_support::GossipSupport as GossipSupportSubsystem;
 pub use polkadot_network_bridge::NetworkBridge as NetworkBridgeSubsystem;
 pub use polkadot_node_collation_generation::CollationGenerationSubsystem;
-pub use polkadot_node_core_approval_voting::ApprovalVotingSubsystem;
-pub use polkadot_node_core_av_store::AvailabilityStoreSubsystem;
-pub use polkadot_node_core_backing::CandidateBackingSubsystem;
-pub use polkadot_node_core_bitfield_signing::BitfieldSigningSubsystem;
-pub use polkadot_node_core_candidate_validation::CandidateValidationSubsystem;
+// pub use polkadot_node_core_approval_voting::ApprovalVotingSubsystem;
+// pub use polkadot_node_core_av_store::AvailabilityStoreSubsystem;
+// pub use polkadot_node_core_backing::CandidateBackingSubsystem;
+// pub use polkadot_node_core_bitfield_signing::BitfieldSigningSubsystem;
+// pub use polkadot_node_core_candidate_validation::CandidateValidationSubsystem;
 pub use polkadot_node_core_chain_api::ChainApiSubsystem;
-pub use polkadot_node_core_chain_selection::ChainSelectionSubsystem;
-pub use polkadot_node_core_dispute_coordinator::DisputeCoordinatorSubsystem;
-pub use polkadot_node_core_dispute_participation::DisputeParticipationSubsystem;
-pub use polkadot_node_core_provisioner::ProvisioningSubsystem as ProvisionerSubsystem;
+// pub use polkadot_node_core_chain_selection::ChainSelectionSubsystem;
+// pub use polkadot_node_core_dispute_coordinator::DisputeCoordinatorSubsystem;
+// pub use polkadot_node_core_dispute_participation::DisputeParticipationSubsystem;
+// pub use polkadot_node_core_provisioner::ProvisioningSubsystem as ProvisionerSubsystem;
 pub use polkadot_node_core_runtime_api::RuntimeApiSubsystem;
-pub use polkadot_statement_distribution::StatementDistribution as StatementDistributionSubsystem;
+// pub use polkadot_statement_distribution::StatementDistribution as StatementDistributionSubsystem;
 
 /// Arguments passed for overseer construction.
 pub struct OverseerGenArgs<'a, Spawner, RuntimeClient>
@@ -77,26 +77,33 @@ where
 	pub keystore: Arc<LocalKeystore>,
 	/// Runtime client generic, providing the `ProvieRuntimeApi` trait besides others.
 	pub runtime_client: Arc<RuntimeClient>,
+	/*
 	/// The underlying key value store for the parachains.
 	pub parachains_db: Arc<dyn kvdb::KeyValueDB>,
+	*/
 	/// Underlying network service implementation.
 	pub network_service: Arc<sc_network::NetworkService<Block, Hash>>,
 	/// Underlying authority discovery service.
 	pub authority_discovery_service: AuthorityDiscoveryService,
+	/*
 	/// POV request receiver
 	pub pov_req_receiver: IncomingRequestReceiver<request_v1::PoVFetchingRequest>,
 	pub chunk_req_receiver: IncomingRequestReceiver<request_v1::ChunkFetchingRequest>,
+	*/
 	pub collation_req_receiver: IncomingRequestReceiver<request_v1::CollationFetchingRequest>,
+	/*
 	pub available_data_req_receiver:
 		IncomingRequestReceiver<request_v1::AvailableDataFetchingRequest>,
 	pub statement_req_receiver: IncomingRequestReceiver<request_v1::StatementFetchingRequest>,
 	pub dispute_req_receiver: IncomingRequestReceiver<request_v1::DisputeRequest>,
+	*/
 	/// Prometheus registry, commonly used for production systems, less so for test.
 	pub registry: Option<&'a Registry>,
 	/// Task spawner to be used throughout the overseer and the APIs it provides.
 	pub spawner: Spawner,
 	/// Determines the behavior of the collator.
 	pub is_collator: IsCollator,
+	/*
 	/// Configuration for the approval voting subsystem.
 	pub approval_voting_config: ApprovalVotingConfig,
 	/// Configuration for the availability store subsystem.
@@ -107,6 +114,7 @@ where
 	pub chain_selection_config: ChainSelectionConfig,
 	/// Configuration for the dispute coordinator subsystem.
 	pub dispute_coordinator_config: DisputeCoordinatorConfig,
+	*/
 }
 
 /// Obtain a prepared `OverseerBuilder`, that is initialized
@@ -116,38 +124,38 @@ pub fn prepared_overseer_builder<'a, Spawner, RuntimeClient>(
 		leaves,
 		keystore,
 		runtime_client,
-		parachains_db,
+		// parachains_db,
 		network_service,
 		authority_discovery_service,
-		pov_req_receiver,
-		chunk_req_receiver,
+		// pov_req_receiver,
+		// chunk_req_receiver,
 		collation_req_receiver,
-		available_data_req_receiver,
-		statement_req_receiver,
-		dispute_req_receiver,
+		// available_data_req_receiver,
+		// statement_req_receiver,
+		// dispute_req_receiver,
 		registry,
 		spawner,
 		is_collator,
-		approval_voting_config,
-		availability_config,
-		candidate_validation_config,
-		chain_selection_config,
-		dispute_coordinator_config,
+		// approval_voting_config,
+		// availability_config,
+		// candidate_validation_config,
+		// chain_selection_config,
+		// dispute_coordinator_config,
 	}: OverseerGenArgs<'a, Spawner, RuntimeClient>,
 ) -> Result<
 	OverseerBuilder<
 		Spawner,
 		Arc<RuntimeClient>,
-		CandidateValidationSubsystem,
-		CandidateBackingSubsystem<Spawner>,
-		StatementDistributionSubsystem,
-		AvailabilityDistributionSubsystem,
-		AvailabilityRecoverySubsystem,
-		BitfieldSigningSubsystem<Spawner>,
-		BitfieldDistributionSubsystem,
-		ProvisionerSubsystem<Spawner>,
+		// CandidateValidationSubsystem,
+		// CandidateBackingSubsystem<Spawner>,
+		// StatementDistributionSubsystem,
+		// AvailabilityDistributionSubsystem,
+		// AvailabilityRecoverySubsystem,
+		// BitfieldSigningSubsystem<Spawner>,
+		// BitfieldDistributionSubsystem,
+		// ProvisionerSubsystem<Spawner>,
 		RuntimeApiSubsystem<RuntimeClient>,
-		AvailabilityStoreSubsystem,
+		// AvailabilityStoreSubsystem,
 		NetworkBridgeSubsystem<
 			Arc<sc_network::NetworkService<Block, Hash>>,
 			AuthorityDiscoveryService,
@@ -155,13 +163,13 @@ pub fn prepared_overseer_builder<'a, Spawner, RuntimeClient>(
 		ChainApiSubsystem<RuntimeClient>,
 		CollationGenerationSubsystem,
 		CollatorProtocolSubsystem,
-		ApprovalDistributionSubsystem,
-		ApprovalVotingSubsystem,
-		GossipSupportSubsystem<AuthorityDiscoveryService>,
-		DisputeCoordinatorSubsystem,
-		DisputeParticipationSubsystem,
-		DisputeDistributionSubsystem<AuthorityDiscoveryService>,
-		ChainSelectionSubsystem,
+		// ApprovalDistributionSubsystem,
+		// ApprovalVotingSubsystem,
+		// GossipSupportSubsystem<AuthorityDiscoveryService>,
+		// DisputeCoordinatorSubsystem,
+		// DisputeParticipationSubsystem,
+		// DisputeDistributionSubsystem<AuthorityDiscoveryService>,
+		// ChainSelectionSubsystem,
 	>,
 	Error,
 >
@@ -176,6 +184,7 @@ where
 	let metrics = <OverseerMetrics as MetricsTrait>::register(registry)?;
 
 	let builder = Overseer::builder()
+		/*
 		.availability_distribution(AvailabilityDistributionSubsystem::new(
 			keystore.clone(),
 			IncomingRequestReceivers { pov_req_receiver, chunk_req_receiver },
@@ -206,6 +215,7 @@ where
 			Metrics::register(registry)?, // candidate-validation metrics
 			Metrics::register(registry)?, // validation host metrics
 		))
+		*/
 		.chain_api(ChainApiSubsystem::new(runtime_client.clone(), Metrics::register(registry)?))
 		.collation_generation(CollationGenerationSubsystem::new(Metrics::register(registry)?))
 		.collator_protocol({
@@ -230,12 +240,15 @@ where
 			Box::new(network_service.clone()),
 			Metrics::register(registry)?,
 		))
+		/*
 		.provisioner(ProvisionerSubsystem::new(spawner.clone(), (), Metrics::register(registry)?))
+		*/
 		.runtime_api(RuntimeApiSubsystem::new(
 			runtime_client.clone(),
 			Metrics::register(registry)?,
 			spawner.clone(),
 		))
+		/*
 		.statement_distribution(StatementDistributionSubsystem::new(
 			keystore.clone(),
 			statement_req_receiver,
@@ -267,6 +280,7 @@ where
 			Metrics::register(registry)?,
 		))
 		.chain_selection(ChainSelectionSubsystem::new(chain_selection_config, parachains_db))
+		*/
 		.leaves(Vec::from_iter(
 			leaves
 				.into_iter()

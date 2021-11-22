@@ -1329,12 +1329,16 @@ async fn handle_collation_fetched_result<Context>(
 
 	if let Entry::Vacant(entry) = state.pending_candidates.entry(relay_parent) {
 		collation_event.1.commitments_hash = Some(candidate_receipt.commitments_hash);
+		// FIXME: CandidateBackingMessage?
+		//  the trait `From<CandidateBackingMessage>` is not implemented for `AllMessages`
+		/*
 		ctx.send_message(CandidateBackingMessage::Second(
 			relay_parent.clone(),
 			candidate_receipt,
 			pov,
 		))
 		.await;
+		*/
 
 		entry.insert(collation_event);
 	} else {
