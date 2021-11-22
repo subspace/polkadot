@@ -128,11 +128,13 @@ pub trait HeadSupportsParachains {
 impl<Client> HeadSupportsParachains for Arc<Client>
 where
 	Client: ProvideRuntimeApi<Block>,
-	Client::Api: ParachainHost<Block>,
+	// Client::Api: ParachainHost<Block>,
 {
 	fn head_supports_parachains(&self, head: &Hash) -> bool {
-		let id = BlockId::Hash(*head);
-		self.runtime_api().has_api::<dyn ParachainHost<Block>>(&id).unwrap_or(false)
+		todo!("Handle HeadSupportsParachains trait");
+		false
+		// let id = BlockId::Hash(*head);
+		// self.runtime_api().has_api::<dyn ParachainHost<Block>>(&id).unwrap_or(false)
 	}
 }
 

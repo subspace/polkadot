@@ -91,7 +91,8 @@ impl<Client, Context> overseer::Subsystem<Context, SubsystemError> for RuntimeAp
 where
 	Client: ProvideRuntimeApi<Block> + Send + 'static + Sync,
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
-	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: AuthorityDiscoveryApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -104,7 +105,8 @@ impl<Client> RuntimeApiSubsystem<Client>
 where
 	Client: ProvideRuntimeApi<Block> + Send + 'static + Sync,
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
-	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: AuthorityDiscoveryApi<Block>,
 {
 	fn store_cache(&mut self, result: RequestResult) {
 		use RequestResult::*;
@@ -303,7 +305,8 @@ async fn run<Client, Context>(
 where
 	Client: ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
-	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: AuthorityDiscoveryApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -333,7 +336,8 @@ fn make_runtime_api_request<Client>(
 where
 	Client: ProvideRuntimeApi<Block>,
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
-	Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
+	Client::Api: AuthorityDiscoveryApi<Block>,
 {
 	let _timer = metrics.time_make_runtime_api_request();
 
@@ -352,36 +356,37 @@ where
 
 	match request {
 		Request::Authorities(sender) => query!(Authorities, authorities(), sender),
-		Request::Validators(sender) => query!(Validators, validators(), sender),
-		Request::ValidatorGroups(sender) => query!(ValidatorGroups, validator_groups(), sender),
-		Request::AvailabilityCores(sender) =>
-			query!(AvailabilityCores, availability_cores(), sender),
-		Request::PersistedValidationData(para, assumption, sender) =>
-			query!(PersistedValidationData, persisted_validation_data(para, assumption), sender),
-		Request::AssumedValidationData(para, expected_persisted_validation_data_hash, sender) =>
-			query!(
-				AssumedValidationData,
-				assumed_validation_data(para, expected_persisted_validation_data_hash),
-				sender
-			),
-		Request::CheckValidationOutputs(para, commitments, sender) =>
-			query!(CheckValidationOutputs, check_validation_outputs(para, commitments), sender),
-		Request::SessionIndexForChild(sender) =>
-			query!(SessionIndexForChild, session_index_for_child(), sender),
-		Request::ValidationCode(para, assumption, sender) =>
-			query!(ValidationCode, validation_code(para, assumption), sender),
-		Request::ValidationCodeByHash(validation_code_hash, sender) =>
-			query!(ValidationCodeByHash, validation_code_by_hash(validation_code_hash), sender),
-		Request::CandidatePendingAvailability(para, sender) =>
-			query!(CandidatePendingAvailability, candidate_pending_availability(para), sender),
-		Request::CandidateEvents(sender) => query!(CandidateEvents, candidate_events(), sender),
-		Request::SessionInfo(index, sender) => query!(SessionInfo, session_info(index), sender),
-		Request::DmqContents(id, sender) => query!(DmqContents, dmq_contents(id), sender),
-		Request::InboundHrmpChannelsContents(id, sender) =>
-			query!(InboundHrmpChannelsContents, inbound_hrmp_channels_contents(id), sender),
+		// Request::Validators(sender) => query!(Validators, validators(), sender),
+		// Request::ValidatorGroups(sender) => query!(ValidatorGroups, validator_groups(), sender),
+		// Request::AvailabilityCores(sender) =>
+			// query!(AvailabilityCores, availability_cores(), sender),
+		// Request::PersistedValidationData(para, assumption, sender) =>
+			// query!(PersistedValidationData, persisted_validation_data(para, assumption), sender),
+		// Request::AssumedValidationData(para, expected_persisted_validation_data_hash, sender) =>
+			// query!(
+				// AssumedValidationData,
+				// assumed_validation_data(para, expected_persisted_validation_data_hash),
+				// sender
+			// ),
+		// Request::CheckValidationOutputs(para, commitments, sender) =>
+			// query!(CheckValidationOutputs, check_validation_outputs(para, commitments), sender),
+		// Request::SessionIndexForChild(sender) =>
+			// query!(SessionIndexForChild, session_index_for_child(), sender),
+		// Request::ValidationCode(para, assumption, sender) =>
+			// query!(ValidationCode, validation_code(para, assumption), sender),
+		// Request::ValidationCodeByHash(validation_code_hash, sender) =>
+			// query!(ValidationCodeByHash, validation_code_by_hash(validation_code_hash), sender),
+		// Request::CandidatePendingAvailability(para, sender) =>
+			// query!(CandidatePendingAvailability, candidate_pending_availability(para), sender),
+		// Request::CandidateEvents(sender) => query!(CandidateEvents, candidate_events(), sender),
+		// Request::SessionInfo(index, sender) => query!(SessionInfo, session_info(index), sender),
+		// Request::DmqContents(id, sender) => query!(DmqContents, dmq_contents(id), sender),
+		// Request::InboundHrmpChannelsContents(id, sender) =>
+			// query!(InboundHrmpChannelsContents, inbound_hrmp_channels_contents(id), sender),
 		// Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
 		Request::CurrentBabeEpoch(sender) => unreachable!("No Babe, we have Subspace"),
-		Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
+		// Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
+		_ => unreachable!("Unsupported request in RuntimeApiSubsystem"),
 	}
 }
 
