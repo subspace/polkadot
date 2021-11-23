@@ -386,8 +386,12 @@ where
 		// Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
 		Request::CurrentBabeEpoch(sender) => unreachable!("No Babe, we have Subspace"),
 		// Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
-		_ => unreachable!("Unsupported request in RuntimeApiSubsystem"),
+		_ => {
+			println!("================== RuntimeApiSubsystem request: {:?}", request);
+		}
 	}
+
+	None
 }
 
 #[derive(Clone)]

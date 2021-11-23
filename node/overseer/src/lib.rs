@@ -131,8 +131,8 @@ where
 	// Client::Api: ParachainHost<Block>,
 {
 	fn head_supports_parachains(&self, head: &Hash) -> bool {
-		todo!("Handle HeadSupportsParachains trait");
-		false
+		println!("============================== `head_supports_parachains` is forced to be true");
+		true
 		// let id = BlockId::Hash(*head);
 		// self.runtime_api().has_api::<dyn ParachainHost<Block>>(&id).unwrap_or(false)
 	}
