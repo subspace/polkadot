@@ -158,7 +158,7 @@ pub fn prepared_overseer_builder<'a, Spawner, RuntimeClient>(
 		// AvailabilityStoreSubsystem,
 		NetworkBridgeSubsystem<
 			Arc<sc_network::NetworkService<Block, Hash>>,
-			AuthorityDiscoveryService,
+			// AuthorityDiscoveryService,
 		>,
 		ChainApiSubsystem<RuntimeClient>,
 		CollationGenerationSubsystem,
@@ -236,7 +236,7 @@ where
 		})
 		.network_bridge(NetworkBridgeSubsystem::new(
 			network_service.clone(),
-			authority_discovery_service.clone(),
+			// authority_discovery_service.clone(),
 			Box::new(network_service.clone()),
 			Metrics::register(registry)?,
 		))
