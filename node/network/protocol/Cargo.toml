@@ -17,3 +17,5 @@ strum = { version = "0.22", features = ["derive"] }
 derive_more = "0.99.11"
 futures = "0.3.17"
 thiserror = "1.0.30"
+
+subspace-runtime-primitives = { path = "/home/xlc/src/github.com/subspace/subspace/crates/subspace-runtime-primitives" }

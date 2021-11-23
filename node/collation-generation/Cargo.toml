@@ -17,5 +17,8 @@ sp-maybe-compressed-blob  = { git = "https://github.com/paritytech/substrate", r
 thiserror = "1.0.30"
 parity-scale-codec = { version = "2.3.1", default-features = false, features = ["bit-vec", "derive"] }
 
+subspace-node-primitives = { path = "/home/xlc/src/github.com/subspace/subspace/crates/subspace-node-primitives" }
+subspace-runtime-primitives = { path = "/home/xlc/src/github.com/subspace/subspace/crates/subspace-runtime-primitives" }
+
 [dev-dependencies]
 polkadot-node-subsystem-test-helpers = { path = "../subsystem-test-helpers" }

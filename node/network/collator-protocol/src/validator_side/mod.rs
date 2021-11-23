@@ -44,7 +44,7 @@ use polkadot_node_network_protocol::{
 };
 use polkadot_node_primitives::{PoV, SignedFullStatement};
 use polkadot_node_subsystem_util::metrics::{self, prometheus};
-use polkadot_primitives::v1::{CandidateReceipt, CollatorId, Hash, Id as ParaId};
+use polkadot_primitives::v1::{CandidateReceipt, Hash, Id as ParaId};
 use polkadot_subsystem::{
 	jaeger,
 	messages::{
@@ -53,6 +53,8 @@ use polkadot_subsystem::{
 	},
 	overseer, FromOverseer, OverseerSignal, PerLeafSpan, SubsystemContext, SubsystemSender,
 };
+
+use subspace_runtime_primitives::CollatorId;
 
 use crate::error::FatalResult;
 
@@ -823,10 +825,12 @@ async fn process_incoming_peer_message<Context>(
 	use sp_runtime::traits::AppVerify;
 	match msg {
 		Declare(collator_id, para_id, signature) => {
+			/* FIXME
 			if collator_peer_id(&state.peer_data, &collator_id).is_some() {
 				modify_reputation(ctx, origin, COST_UNEXPECTED_MESSAGE).await;
 				return
 			}
+			*/
 
 			let peer_data = match state.peer_data.get_mut(&origin) {
 				Some(p) => p,
@@ -841,10 +845,12 @@ async fn process_incoming_peer_message<Context>(
 				return
 			}
 
+			/* FIXME re-enable the verify
 			if !signature.verify(&*protocol_v1::declare_signature_payload(&origin), &collator_id) {
 				modify_reputation(ctx, origin, COST_INVALID_SIGNATURE).await;
 				return
 			}
+			*/
 
 			if state.active_paras.is_current_or_next(para_id) {
 				tracing::debug!(
@@ -1093,7 +1099,8 @@ async fn process_msg<Context>(
 			);
 		},
 		ReportCollator(id) => {
-			report_collator(ctx, &state.peer_data, id).await;
+			// FIXME
+			// report_collator(ctx, &state.peer_data, id).await;
 		},
 		NetworkBridgeUpdateV1(event) => {
 			if let Err(e) = handle_network_msg(ctx, state, keystore, event).await {

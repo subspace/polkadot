@@ -6023,6 +6023,7 @@ dependencies = [
  "sp-keyring",
  "sp-keystore",
  "sp-runtime",
+ "subspace-runtime-primitives",
  "thiserror",
  "tracing",
 ]
@@ -6144,6 +6145,8 @@ dependencies = [
  "polkadot-primitives",
  "sp-core",
  "sp-maybe-compressed-blob",
+ "subspace-node-primitives",
+ "subspace-runtime-primitives",
  "thiserror",
  "tracing",
 ]
@@ -6478,6 +6481,7 @@ dependencies = [
  "sc-authority-discovery",
  "sc-network",
  "strum 0.22.0",
+ "subspace-runtime-primitives",
  "thiserror",
 ]
 
@@ -6544,6 +6548,7 @@ dependencies = [
  "polkadot-statement-table",
  "sc-network",
  "smallvec",
+ "subspace-node-primitives",
  "substrate-prometheus-endpoint",
  "thiserror",
 ]
@@ -10370,6 +10375,26 @@ version = "0.1.0"
 source = "git+https://github.com/paritytech/substrate-debug-kit?branch=master#971b667963fdb0049dae349eaecbe22f4181e49f"
 dependencies = [
  "separator",
+]
+
+[[package]]
+name = "subspace-node-primitives"
+version = "0.1.0"
+dependencies = [
+ "futures 0.3.17",
+ "subspace-runtime-primitives",
+]
+
+[[package]]
+name = "subspace-runtime-primitives"
+version = "0.1.0"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]

@@ -22,6 +22,8 @@ polkadot-node-primitives = { path = "../../primitives" }
 polkadot-node-subsystem-util = { path = "../../subsystem-util" }
 polkadot-subsystem = { package = "polkadot-node-subsystem", path = "../../subsystem" }
 
+subspace-runtime-primitives = { path = "/home/xlc/src/github.com/subspace/subspace/crates/subspace-runtime-primitives" }
+
 [dev-dependencies]
 log = "0.4.13"
 env_logger = "0.9.0"

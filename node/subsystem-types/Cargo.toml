@@ -18,3 +18,5 @@ sc-network = { git = "https://github.com/paritytech/substrate", rev = "a9465729e
 smallvec = "1.6.1"
 substrate-prometheus-endpoint = { git = "https://github.com/paritytech/substrate", rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 thiserror = "1.0.30"
+
+subspace-node-primitives = { path = "/home/xlc/src/github.com/subspace/subspace/crates/subspace-node-primitives" }
