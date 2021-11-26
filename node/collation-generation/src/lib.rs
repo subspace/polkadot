@@ -21,11 +21,7 @@
 use futures::{channel::mpsc, future::FutureExt, join, select, sink::SinkExt, stream::StreamExt};
 use parity_scale_codec::Encode;
 use polkadot_node_primitives::{AvailableData, PoV};
-use polkadot_node_subsystem::{
-	messages::{AllMessages, CollationGenerationMessage, CollatorProtocolMessage},
-	overseer, ActiveLeavesUpdate, FromOverseer, OverseerSignal, SpawnedSubsystem, SubsystemContext,
-	SubsystemError, SubsystemResult,
-};
+use polkadot_node_subsystem::{ActiveLeavesUpdate, FromOverseer, OverseerSignal, SpawnedSubsystem, SubsystemContext, SubsystemError, SubsystemResult, messages::{AllMessages, CollationGenerationMessage, CollatorProtocolMessage, RuntimeApiMessage, RuntimeApiRequest}, overseer};
 use polkadot_node_subsystem_util::{
 	metrics::{self, prometheus},
 	request_availability_cores, request_persisted_validation_data, request_validation_code,
@@ -124,6 +120,7 @@ impl CollationGenerationSubsystem {
 				if let Some(config) = &self.config {
 					let metrics = self.metrics.clone();
 					// if let Err(err) = handle_new_activations(
+					println!("========================== [handle_new_activations_subspace], activated:{:?}", activated);
 					if let Err(err) = handle_new_activations_subspace(
 						config.clone(),
 						activated.into_iter().map(|v| v.hash),
@@ -133,6 +130,7 @@ impl CollationGenerationSubsystem {
 					)
 					.await
 					{
+						println!("========================== failed to handle new activations, err: {:?}", err);
 						tracing::warn!(target: LOG_TARGET, err = ?err, "failed to handle new activations");
 					}
 				}
@@ -189,6 +187,7 @@ async fn handle_new_activations_subspace<Context: SubsystemContext>(
 ) -> crate::error::Result<()> {
 	for relay_parent in activated {
 		let task_config = config.clone();
+		// FIXME: figure out the content of validation_data
 		let validation_data = PersistedValidationData::default();
 		let (collation, result_sender) =
 			match (task_config.collator)(relay_parent, &validation_data).await {
@@ -203,7 +202,36 @@ async fn handle_new_activations_subspace<Context: SubsystemContext>(
 					// return
 				},
 			};
+
+			let task_config = config.clone();
+			let mut task_sender = sender.clone();
+			let metrics = metrics.clone();
+			ctx.spawn(
+				"collation generation collation builder",
+				Box::pin(async move {
+					println!("=================== Sending RuntimeApiRequest, relay_parent: {:?}", relay_parent);
+					if let Err(err) = task_sender
+						.send(AllMessages::RuntimeApi(
+							RuntimeApiMessage::Request(relay_parent, RuntimeApiRequest::SubmitCandidateReceipt(collation))
+						))
+						.await
+					{
+						println!("=================== Failed to send RuntimeApiRequest, err: {:?}", err);
+						tracing::warn!(
+							target: LOG_TARGET,
+							err = ?err,
+							"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX failed to send collation result",
+						);
+					} else {
+						println!("====================== Sent RuntimeApiRequest successfully");
+					}
+				}
+				));
 	}
+
+	// handle the collation
+	//
+	// DistributeCollation to everyone
 
 	Ok(())
 }

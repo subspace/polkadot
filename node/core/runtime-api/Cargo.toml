@@ -15,6 +15,8 @@ sp-authority-discovery = { git = "https://github.com/paritytech/substrate", rev 
 sp-core = { git = "https://github.com/paritytech/substrate", rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 sp-consensus-babe = { git = "https://github.com/paritytech/substrate", rev = "a9465729e2c5d2ef8d87ac404da27e5e10adde8a" }
 
+sp-executor = { path = "/home/xlc/src/github.com/subspace/subspace/crates/sp-executor" }
+
 polkadot-primitives = { path = "../../../primitives" }
 polkadot-subsystem = { package = "polkadot-node-subsystem", path = "../../subsystem" }
 polkadot-node-subsystem-util = { path = "../../subsystem-util" }

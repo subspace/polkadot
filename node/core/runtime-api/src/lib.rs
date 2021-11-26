@@ -35,6 +35,7 @@ use sp_api::ProvideRuntimeApi;
 // use sp_authority_discovery::AuthorityDiscoveryApi;
 // use sp_consensus_babe::BabeApi;
 use sp_core::traits::SpawnNamed;
+use sp_executor::ExecutorApi;
 
 use cache::{RequestResult, RequestResultCache};
 use futures::{channel::oneshot, prelude::*, select, stream::FuturesUnordered};
@@ -93,6 +94,7 @@ where
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: AuthorityDiscoveryApi<Block>,
+	Client::Api: ExecutorApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -107,6 +109,7 @@ where
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: AuthorityDiscoveryApi<Block>,
+	Client::Api: ExecutorApi<Block>,
 {
 	fn store_cache(&mut self, result: RequestResult) {
 		use RequestResult::*;
@@ -158,6 +161,7 @@ where
 				self.requests_cache.cache_current_babe_epoch(relay_parent, epoch),
 			FetchOnChainVotes(relay_parent, scraped) =>
 				self.requests_cache.cache_on_chain_votes(relay_parent, scraped),
+			SubmitCandidateReceipt(..) => {}
 		}
 	}
 
@@ -241,6 +245,7 @@ where
 				query!(current_babe_epoch(), sender).map(|sender| Request::CurrentBabeEpoch(sender)),
 			Request::FetchOnChainVotes(sender) =>
 				query!(on_chain_votes(), sender).map(|sender| Request::FetchOnChainVotes(sender)),
+			Request::SubmitCandidateReceipt(_foo) => None
 		}
 	}
 
@@ -252,10 +257,10 @@ where
 		let metrics = self.metrics.clone();
 		let (sender, receiver) = oneshot::channel();
 
-		let request = match self.query_cache(relay_parent.clone(), request) {
-			Some(request) => request,
-			None => return,
-		};
+		// let request = match self.query_cache(relay_parent.clone(), request) {
+			// Some(request) => request,
+			// None => return,
+		// };
 
 		let request = async move {
 			let result = make_runtime_api_request(client, metrics, relay_parent, request);
@@ -307,6 +312,7 @@ where
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: AuthorityDiscoveryApi<Block>,
+	Client::Api: ExecutorApi<Block>,
 	Context: SubsystemContext<Message = RuntimeApiMessage>,
 	Context: overseer::SubsystemContext<Message = RuntimeApiMessage>,
 {
@@ -318,6 +324,7 @@ where
 				FromOverseer::Signal(OverseerSignal::BlockFinalized(..)) => {},
 				FromOverseer::Communication { msg } => match msg {
 					RuntimeApiMessage::Request(relay_parent, request) => {
+						println!("================= received Request: {:?}, relay_parent: {:?}", request, relay_parent);
 						subsystem.spawn_request(relay_parent, request);
 					},
 				}
@@ -338,6 +345,7 @@ where
 	// Client::Api: ParachainHost<Block> + BabeApi<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: ParachainHost<Block> + AuthorityDiscoveryApi<Block>,
 	// Client::Api: AuthorityDiscoveryApi<Block>,
+	Client::Api: ExecutorApi<Block>,
 {
 	let _timer = metrics.time_make_runtime_api_request();
 
@@ -385,6 +393,21 @@ where
 			// query!(InboundHrmpChannelsContents, inbound_hrmp_channels_contents(id), sender),
 		// Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
 		Request::CurrentBabeEpoch(sender) => unreachable!("No Babe, we have Subspace"),
+		Request::SubmitCandidateReceipt(foo) =>
+			// query!(SubmitCandidateReceipt, submit_unsigned_candidate_receipt_extrinsic(foo), sender),
+		{
+			let api = client.runtime_api();
+			println!("============ Calling `submit_unsigned_candidate_receipt_extrinsic` from RuntimeApiSubsystem");
+			let res = api.submit_unsigned_candidate_receipt_extrinsic(&BlockId::Hash(relay_parent), foo.clone())
+				.map_err(|e| RuntimeApiError::from(format!("{:?}", e)));
+			metrics.on_request(res.is_ok());
+			// if let Some(sender) = sender {
+				// let _ = sender.send(res.clone());
+			// }
+
+			res.ok().map(|res| RequestResult::SubmitCandidateReceipt(relay_parent, foo));
+		}
+
 		// Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
 		_ => {
 			println!("================== RuntimeApiSubsystem request: {:?}", request);

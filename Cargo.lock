@@ -6437,6 +6437,7 @@ dependencies = [
  "sp-authority-discovery",
  "sp-consensus-babe",
  "sp-core",
+ "sp-executor",
  "tracing",
 ]
 
@@ -9767,6 +9768,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "sp-executor"
+version = "0.1.0"
+dependencies = [
+ "sp-api",
+ "sp-std",
 ]
 
 [[package]]

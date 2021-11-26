@@ -389,4 +389,5 @@ pub(crate) enum RequestResult {
 	),
 	CurrentBabeEpoch(Hash, Epoch),
 	FetchOnChainVotes(Hash, Option<ScrapedOnChainVotes>),
+	SubmitCandidateReceipt(Hash, Vec<u8>),
 }
