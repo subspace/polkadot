@@ -656,7 +656,8 @@ pub enum RuntimeApiRequest {
 	FetchOnChainVotes(RuntimeApiSender<Option<polkadot_primitives::v1::ScrapedOnChainVotes>>),
 	///
 	// SubmitCandidateReceipt(Vec<u8>, Option<RuntimeApiSender<Option<()>>>)
-	SubmitCandidateReceipt(Vec<u8>)
+	SubmitCandidateReceipt(u32, Hash),
+	PendingHead(RuntimeApiSender<Option<Hash>>),
 }
 
 /// A message to the Runtime API subsystem.

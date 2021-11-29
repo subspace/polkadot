@@ -162,6 +162,7 @@ where
 			FetchOnChainVotes(relay_parent, scraped) =>
 				self.requests_cache.cache_on_chain_votes(relay_parent, scraped),
 			SubmitCandidateReceipt(..) => {}
+			PendingHead(..) => {}
 		}
 	}
 
@@ -245,7 +246,8 @@ where
 				query!(current_babe_epoch(), sender).map(|sender| Request::CurrentBabeEpoch(sender)),
 			Request::FetchOnChainVotes(sender) =>
 				query!(on_chain_votes(), sender).map(|sender| Request::FetchOnChainVotes(sender)),
-			Request::SubmitCandidateReceipt(_foo) => None
+			Request::SubmitCandidateReceipt(..) => None,
+			Request::PendingHead(..) => None,
 		}
 	}
 
@@ -324,7 +326,7 @@ where
 				FromOverseer::Signal(OverseerSignal::BlockFinalized(..)) => {},
 				FromOverseer::Communication { msg } => match msg {
 					RuntimeApiMessage::Request(relay_parent, request) => {
-						println!("================= received Request: {:?}, relay_parent: {:?}", request, relay_parent);
+						println!("[RuntimeApiSubsystem::run] received Request: {:?}, relay_parent: {:?}", request, relay_parent);
 						subsystem.spawn_request(relay_parent, request);
 					},
 				}
@@ -393,21 +395,31 @@ where
 			// query!(InboundHrmpChannelsContents, inbound_hrmp_channels_contents(id), sender),
 		// Request::CurrentBabeEpoch(sender) => query!(CurrentBabeEpoch, current_epoch(), sender),
 		Request::CurrentBabeEpoch(sender) => unreachable!("No Babe, we have Subspace"),
-		Request::SubmitCandidateReceipt(foo) =>
+		Request::SubmitCandidateReceipt(head_number, head_hash) =>
 			// query!(SubmitCandidateReceipt, submit_unsigned_candidate_receipt_extrinsic(foo), sender),
 		{
 			let api = client.runtime_api();
 			println!("============ Calling `submit_unsigned_candidate_receipt_extrinsic` from RuntimeApiSubsystem");
-			let res = api.submit_unsigned_candidate_receipt_extrinsic(&BlockId::Hash(relay_parent), foo.clone())
+			let res = api.submit_unsigned_candidate_receipt_extrinsic(&BlockId::Hash(relay_parent), head_number, head_hash.clone())
 				.map_err(|e| RuntimeApiError::from(format!("{:?}", e)));
 			metrics.on_request(res.is_ok());
 			// if let Some(sender) = sender {
 				// let _ = sender.send(res.clone());
 			// }
 
-			res.ok().map(|res| RequestResult::SubmitCandidateReceipt(relay_parent, foo));
+			res.ok().map(|res| RequestResult::SubmitCandidateReceipt(relay_parent, head_number, head_hash));
 		}
+		Request::PendingHead(sender) => {
+			let api = client.runtime_api();
+			let res = api.pending_head(&BlockId::Hash(relay_parent))
+				.map_err(|e| RuntimeApiError::from(format!("{:?}", e)));
+			println!("============ Calling `pending_head` from RuntimeApiSubsystem, res: {:?}", res);
+			metrics.on_request(res.is_ok());
 
+			let _ = sender.send(res.clone());
+
+			res.ok().map(|res| RequestResult::PendingHead(relay_parent, res));
+		}
 		// Request::FetchOnChainVotes(sender) => query!(FetchOnChainVotes, on_chain_votes(), sender),
 		_ => {
 			println!("================== RuntimeApiSubsystem request: {:?}", request);
